@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SpectraMaster.Data;
+using SpectraMaster.Models;
 
 namespace SpectraMaster
 {
@@ -24,6 +25,9 @@ namespace SpectraMaster
             services.AddControllers();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<AnswerDbContext>(opt => opt.UseMySQL(connectionString));
+
+            services.AddTransient<IAnswerRepository,AnswerRepository>();
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "SpectraMaster", Version = "v1"});

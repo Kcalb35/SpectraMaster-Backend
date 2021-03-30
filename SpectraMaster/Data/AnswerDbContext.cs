@@ -9,6 +9,8 @@ namespace SpectraMaster.Data
         public DbSet<MassProblem> MassProblems { get; set; }
         public DbSet<AnswerPicture> AnswerPics { get; set; }
         public DbSet<ProblemPicture> ProblemPics { get; set; }
+        public DbSet<MassProblemAnswer> MassProblemAnswers { get; set; }
+        public DbSet<NMRProblemAnswer> NmrProblemAnswers { get; set; }
 
         public AnswerDbContext(DbContextOptions<AnswerDbContext> options) : base(options)
         {

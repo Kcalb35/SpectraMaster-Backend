@@ -61,3 +61,30 @@ A server for NMR spectra problem and Mass spectra problem collecting and searchi
 ## Admins
 
 not implement
+
+# CRUD
+
+create
+
+create answer with descriptions ,list of pictures in format of string
+
+- if NMR , we need number of atoms (or all-zero for no molecular formula)
+- if Mass, we need ion peak
+- if comlex , we need both
+- return a `SpectraAnswer`，and put not null `ProblemAnswer` member to Dbset
+
+delete
+
+delete the whole answer
+
+- we need the id of `SpectraAnswer`
+
+update
+
+the same as create
+
+retrieve
+
+- if NMR, we need the number of atoms and whether to show no molecular formula
+- if Mass , we need ion peak (or range)
+- if complex , we need both

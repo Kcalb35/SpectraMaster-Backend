@@ -46,11 +46,17 @@ A server for NMR spectra problem and Mass spectra problem collecting and searchi
 
 ## NMRProblemAnswer
 
-
+| column       | type | remarks          |
+| ------------ | ---- | ---------------- |
+| NMRProblemId | INT  | together primay  |
+| AnswerId     | INT  | together primary |
 
 ## MassProblemAnswer
 
-
+| column        | type | remarks          |
+| ------------- | ---- | ---------------- |
+| MassProblemId | INT  | together primary |
+| AnswerId      | INT  | together primary |
 
 ## Admins
 

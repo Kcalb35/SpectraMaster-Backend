@@ -28,13 +28,15 @@ A server for NMR spectra problem and Mass spectra problem collecting and searchi
 | Cl          | SMALLINT |                 |
 | Br          | SMALLINT |                 |
 | I           | SMALLINT |                 |
+| AnswerId    | INT      | foreign key     |
 
 ## MassProblems
 
-| column  | type  | remarks     |
-| ------- | ----- | ----------- |
-| Id      | INT   | primary key |
-| IonPeak | FLOAT |             |
+| column   | type  | remarks     |
+| -------- | ----- | ----------- |
+| Id       | INT   | primary key |
+| IonPeak  | FLOAT |             |
+| AnswerId | INT   | foreign key |
 
 ## AnswerPics / ProblemPics
 
@@ -43,20 +45,6 @@ A server for NMR spectra problem and Mass spectra problem collecting and searchi
 | Id       | INT  | primary key |
 | Path     | text |             |
 | AnswerId | INT  | foreign key |
-
-## NMRProblemAnswer
-
-| column       | type | remarks          |
-| ------------ | ---- | ---------------- |
-| NMRProblemId | INT  | together primay  |
-| AnswerId     | INT  | together primary |
-
-## MassProblemAnswer
-
-| column        | type | remarks          |
-| ------------- | ---- | ---------------- |
-| MassProblemId | INT  | together primary |
-| AnswerId      | INT  | together primary |
 
 ## Admins
 
@@ -75,9 +63,10 @@ create answer with descriptions ,list of pictures in format of string
 
 delete
 
-delete the whole answer
+- delete the whole answer
 
-- we need the id of `SpectraAnswer`
+- delete nmr problem
+- delete mass problem
 
 update
 
@@ -85,6 +74,30 @@ the same as create
 
 retrieve
 
-- if NMR, we need the number of atoms and whether to show no molecular formula
-- if Mass , we need ion peak (or range)
-- if complex , we need both
+- retrieve answer massProblem NMRProblem by id
+- retrieve all answer/massProblem/NMRProblem
+- retrieve answer by nmr or mass property
+
+
+
+# Backend API
+
+- Get By id
+  -  `api/ans/id` GET
+  - return everything
+- get by mass id
+  -  `api/mass/id` GET
+  - return mass id ,problem pictures, problem description, ion peak, formula =null
+- get by nmr id 
+  - `api/nmr/id` GET
+  - return nmr id, problem pictures, problem description, formula, ion peak = -1
+- get all answer `api/ans` GET
+- get all mass `api/mass` GET
+- get all nmr `api/nmr` GET
+- delete By id `api/ans/id` DELETE
+- delte by nmr id `api/nmr/id` DELETE
+- delete by mass id `api/mass/id` DELETE
+- update By id with information `api/ans/id` PUT
+- Search  `api/ans/search` POST
+  - if nmr ,then `minionpeak=maxionpeak=-1`
+  - if mass, then `formula=null`

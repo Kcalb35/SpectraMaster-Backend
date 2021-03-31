@@ -4,14 +4,10 @@ namespace SpectraMaster.Data
 {
     public class SpectraAnswer
     {
-        public SpectraAnswer(string prob ,string ans,IEnumerable<ProblemPicture> probPics,IEnumerable<AnswerPicture> ansPics)
+        public SpectraAnswer(string prob ,string ans)
         {
             ProblemDescription = prob;
             AnswerDescription = ans;
-            ProblemPictures = new List<ProblemPicture>();
-            ProblemPictures.AddRange(probPics);
-            AnswerPictures = new List<AnswerPicture>();
-            AnswerPictures.AddRange(ansPics);
         }
 
         public SpectraAnswer()
@@ -24,7 +20,7 @@ namespace SpectraMaster.Data
         public List<ProblemPicture> ProblemPictures { get; set; }
         public List<AnswerPicture> AnswerPictures { get; set; }
 
-        public NMRProblemAnswer NmrProblemAnswer{ get; set; }
-        public MassProblemAnswer MassProblemAnswer { get; set; }
+        public MassProblem MassProblem { get; set; }
+        public NMRProblem NmrProblem { get; set; }
     }
 }

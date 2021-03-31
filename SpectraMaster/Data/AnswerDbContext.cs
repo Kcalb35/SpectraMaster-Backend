@@ -9,8 +9,6 @@ namespace SpectraMaster.Data
         public DbSet<MassProblem> MassProblems { get; set; }
         public DbSet<AnswerPicture> AnswerPics { get; set; }
         public DbSet<ProblemPicture> ProblemPics { get; set; }
-        public DbSet<MassProblemAnswer> MassProblemAnswers { get; set; }
-        public DbSet<NMRProblemAnswer> NmrProblemAnswers { get; set; }
 
         public AnswerDbContext(DbContextOptions<AnswerDbContext> options) : base(options)
         {
@@ -26,8 +24,14 @@ namespace SpectraMaster.Data
                 .HasOne(pic => pic.SpectraAnswer)
                 .WithMany(a => a.ProblemPictures)
                 .HasForeignKey(pic => pic.AnswerId);
-            modelBuilder.Entity<MassProblemAnswer>().HasKey(x => new {x.AnswerId, x.MassProblemId});
-            modelBuilder.Entity<NMRProblemAnswer>().HasKey(x => new {x.AnswerId, x.NMRProblemId});
+            modelBuilder.Entity<MassProblem>()
+                .HasOne(p => p.Answer)
+                .WithOne(a => a.MassProblem)
+                .HasForeignKey<MassProblem>(p => p.AnswerId);
+            modelBuilder.Entity<NMRProblem>()
+                .HasOne(p => p.Answer)
+                .WithOne(a => a.NmrProblem)
+                .HasForeignKey<NMRProblem>(p => p.AnswerId);
         }
     }
 }

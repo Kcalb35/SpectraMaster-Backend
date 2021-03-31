@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using SpectraMaster.Data;
 using SpectraMaster.Models;
+using SpectraMaster.Utils;
 
 namespace SpectraMaster
 {
@@ -27,6 +28,7 @@ namespace SpectraMaster
             services.AddDbContextPool<AnswerDbContext>(opt => opt.UseMySQL(connectionString));
 
             services.AddTransient<IAnswerRepository,AnswerRepository>();
+            services.AddSingleton<IFileUtil, FileUtil>();
             
             services.AddSwaggerGen(c =>
             {
@@ -44,7 +46,7 @@ namespace SpectraMaster
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SpectraMaster v1"));
             }
 
-            app.UseHttpsRedirection();
+            app.UseStaticFiles();            
 
             app.UseRouting();
 

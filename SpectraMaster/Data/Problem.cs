@@ -1,3 +1,5 @@
+using SpectraMaster.AnswerController.Dto;
+using SpectraMaster.Controllers;
 using SpectraMaster.Models;
 
 namespace SpectraMaster.Data
@@ -42,7 +44,9 @@ namespace SpectraMaster.Data
         public int Cl { get; set; }
         public int Br { get; set; }
         public int I { get; set; }
-        public NMRProblemAnswer NmrProblemAnswer { get; set; }
+
+        public SpectraAnswer Answer{ get; set; }
+        public int AnswerId { get; set; }
     }
 
     public class MassProblem
@@ -58,6 +62,7 @@ namespace SpectraMaster.Data
         }
         public int Id { get; set; }
         public float IonPeak { get; set; }
-        public MassProblemAnswer MassProblemAnswer { get; set; }
+        public SpectraAnswer Answer { get; set; }
+        public int AnswerId { get; set; }
     }
 }

@@ -29,6 +29,16 @@ namespace SpectraMaster
 
             services.AddTransient<IAnswerRepository,AnswerRepository>();
             services.AddSingleton<IFileUtil, FileUtil>();
+
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+            });
             
             services.AddSwaggerGen(c =>
             {
@@ -49,7 +59,7 @@ namespace SpectraMaster
             app.UseStaticFiles();            
 
             app.UseRouting();
-
+            app.UseCors();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

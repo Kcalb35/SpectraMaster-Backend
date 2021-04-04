@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpectraMaster.Models;
@@ -22,6 +23,7 @@ namespace SpectraMaster.Controllers
             _fileUtil = fileUtil;
         }
 
+        [AllowAnonymous]
         [HttpGet("ans/{id:int}")]
         public IActionResult GetAnswerById([FromRoute] int id)
         {
@@ -30,6 +32,7 @@ namespace SpectraMaster.Controllers
             return Ok(ResponseUtil.AnswerConvert(ans));
         }
 
+        [AllowAnonymous]
         [HttpGet("ans/all")]
         public IActionResult GetAllAnswer()
         {
@@ -38,6 +41,7 @@ namespace SpectraMaster.Controllers
             return Ok(resp);
         }
 
+        [AllowAnonymous]
         [HttpGet("nmr")]
         public IActionResult GetAllNMR()
         {
@@ -45,6 +49,7 @@ namespace SpectraMaster.Controllers
             return Ok(probs);
         }
 
+        [AllowAnonymous]
         [HttpGet("nmr/{id:int}")]
         public IActionResult GetNMRById(int id)
         {
@@ -53,6 +58,7 @@ namespace SpectraMaster.Controllers
             return Ok(ResponseUtil.NmrProblemConvert(prob));
         }
 
+        [AllowAnonymous]
         [HttpGet("mass")]
         public IActionResult GetAllMass()
         {
@@ -60,6 +66,7 @@ namespace SpectraMaster.Controllers
             return Ok(probs);
         }
 
+        [AllowAnonymous]
         [HttpGet("mass/{id:int}")]
         public IActionResult GetMassById(int id)
         {
@@ -68,6 +75,7 @@ namespace SpectraMaster.Controllers
             return Ok(prob);
         }
 
+        [AllowAnonymous]
         [HttpPost("ans/search")]
         public IActionResult SearchAnswer([FromBody] SearchReq req)
         {
@@ -76,7 +84,7 @@ namespace SpectraMaster.Controllers
             return Ok(answers.Select(ResponseUtil.AnswerConvert));
         }
 
-
+        [Authorize]
         [HttpPost("ans")]
         public async Task<IActionResult> CreateAnswer([FromForm] CreateReq req)
         {
@@ -95,6 +103,7 @@ namespace SpectraMaster.Controllers
             return Ok(ResponseUtil.AnswerConvert(answer));
         }
 
+        [Authorize]
         [HttpDelete("ans/{id:int}")]
         public async Task<IActionResult> DeleteAnswer([FromRoute] int id)
         {
@@ -103,6 +112,7 @@ namespace SpectraMaster.Controllers
             return NotFound();
         }
 
+        [Authorize]
         [HttpDelete("nmr/{id:int}")]
         public async Task<IActionResult> DeleteNmrProblem(int id)
         {
@@ -111,6 +121,7 @@ namespace SpectraMaster.Controllers
             return NotFound();
         }
 
+        [Authorize]
         [HttpDelete("mass/{id:int}")]
         public async Task<IActionResult> DeleteMassProblem(int id)
         {
@@ -119,6 +130,7 @@ namespace SpectraMaster.Controllers
             return NotFound();
         }
 
+        [Authorize]
         [HttpPut("ans/{id:int}")]
         public async Task<IActionResult> UpdateAnswer([FromRoute] int id, [FromForm] CreateReq req)
         {

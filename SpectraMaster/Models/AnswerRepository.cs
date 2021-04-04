@@ -101,7 +101,7 @@ namespace SpectraMaster.Models
             _context.MassProblems.Remove(ans.MassProblem);
             _context.NmrProblems.Remove(ans.NmrProblem);
 
-            if (formula != null)
+            if (formula != null && formula.IsValid())
             {
                 // nmr
                 var nmrProblem = new NMRProblem(formula);
@@ -159,10 +159,10 @@ namespace SpectraMaster.Models
 
         public IEnumerable<SpectraAnswer> RetrieveAnswer(FormulaConfig formula, float minIonPeak, float maxIonPeak)
         {
-            if (formula == null && (minIonPeak < 0 && maxIonPeak < 0 || minIonPeak > maxIonPeak)) return null;
+            if ((formula == null || !formula.IsValid()) && (minIonPeak < 0 && maxIonPeak < 0 || minIonPeak > maxIonPeak)) return null;
             var ans = RetrieveAllAnswers();
             // nmr
-            if (formula != null )
+            if (formula != null && formula.IsValid())
                 ans = ans.Where(p => p.NmrProblem != null && p.NmrProblem.IsEqual(formula));
             // mass
             if (minIonPeak >= 0 && maxIonPeak >= 0)

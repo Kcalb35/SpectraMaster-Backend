@@ -1,9 +1,13 @@
+using System;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SpectraMaster.Data;
 using SpectraMaster.Models;
@@ -26,10 +30,37 @@ namespace SpectraMaster
             services.AddControllers();
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContextPool<AnswerDbContext>(opt => opt.UseMySQL(connectionString));
+            services.AddDbContextPool<ManagerDbContext>(opt => opt.UseMySQL(connectionString));
 
             services.AddTransient<IAnswerRepository,AnswerRepository>();
             services.AddSingleton<IFileUtil, FileUtil>();
 
+            services.AddTransient<IAuthentiacteService, AuthenticateService>(); 
+            // jwt
+            services.Configure<TokenManagement>(Configuration.GetSection("tokenManagement"));
+            var token = Configuration.GetSection("tokenManagement").Get<TokenManagement>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
+                {
+                    opt.RequireHttpsMetadata = false;
+                    opt.SaveToken = true;
+                    opt.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = true,
+
+                        ValidIssuer = token.Issuer,
+                        ValidAudience = token.Audience,
+                        LifetimeValidator = (notBefore, expire, securityToken, parameters) =>
+                        {
+                            if (expire != null) return expire > DateTime.UtcNow;
+                            return false;
+                        },
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(token.Secret)),
+                    };
+                });
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
@@ -60,6 +91,7 @@ namespace SpectraMaster
 
             app.UseRouting();
             app.UseCors();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

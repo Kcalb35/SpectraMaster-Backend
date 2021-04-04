@@ -7,7 +7,7 @@ using SpectraMaster.Data;
 
 namespace SpectraMaster.Models
 {
-    public class AnswerRepository:IAnswerRepository
+    public class AnswerRepository : IAnswerRepository
     {
         private readonly AnswerDbContext _context;
 
@@ -15,15 +15,15 @@ namespace SpectraMaster.Models
         {
             _context = context;
         }
-        
+
         public async Task<SpectraAnswer> CreateAnswerAsync(string probDescription, string ansDescription,
             List<string> probPics, List<string> ansPics, FormulaConfig formula, float ionPeak = -1)
         {
-            if (!formula.IsValid() && ionPeak <0) return null;
+            if ((formula == null || !formula.IsValid()) && ionPeak < 0) return null;
             var probPictures = probPics.Select(pic => new ProblemPicture(pic));
             var ansPictures = ansPics.Select(pic => new AnswerPicture(pic));
             var answer = new SpectraAnswer(probDescription, ansDescription);
-            if (formula.IsValid())
+            if (formula != null && formula.IsValid())
             {
                 // NMR
                 var nmrProb = new NMRProblem(formula);
@@ -31,7 +31,7 @@ namespace SpectraMaster.Models
                 await _context.NmrProblems.AddAsync(nmrProb);
             }
 
-            if (ionPeak >=0)
+            if (ionPeak >= 0)
             {
                 // Mass
                 var massProb = new MassProblem(ionPeak);
@@ -45,11 +45,13 @@ namespace SpectraMaster.Models
                 pic.SpectraAnswer = answer;
                 await _context.AnswerPics.AddRangeAsync(pic);
             }
+
             foreach (var pic in probPictures)
             {
                 pic.SpectraAnswer = answer;
                 await _context.ProblemPics.AddAsync(pic);
             }
+
             await _context.SaveChangesAsync();
             return RetrieveAnswerById(answer.Id);
         }
@@ -86,20 +88,32 @@ namespace SpectraMaster.Models
             float ionPeak = -1, FormulaConfig formula = null)
         {
             var ans = RetrieveAnswerById(id);
-            if (ans == null || (ionPeak<0 && (formula==null || !formula.IsValid()))) return null;
-            
+            if (ans == null || (ionPeak < 0 && (formula == null || !formula.IsValid()))) return null;
+
             ans.ProblemDescription = probDescription;
             ans.AnswerDescription = ansDescription;
             var probPictures = probPics.Select(pic => new ProblemPicture(pic) {SpectraAnswer = ans}).ToList();
             var ansPictures = ansPics.Select(pic => new AnswerPicture(pic) {SpectraAnswer = ans}).ToList();
-            
-            // delete old pictures
-            _context.AnswerPics.RemoveRange(ans.AnswerPictures);
-            _context.ProblemPics.RemoveRange(ans.ProblemPictures);
-            
+
+            // if not any ,then do nothing to old pictures
+            if (ansPics.Any())
+            {
+                _context.AnswerPics.RemoveRange(ans.AnswerPictures);
+                await _context.AnswerPics.AddRangeAsync(ansPictures);
+            }
+
+            if (probPics.Any())
+            {
+                _context.ProblemPics.RemoveRange(ans.ProblemPictures);
+                await _context.ProblemPics.AddRangeAsync(probPictures);
+            }
+
+
             // delete old nmr or mass problem
-            _context.MassProblems.Remove(ans.MassProblem);
-            _context.NmrProblems.Remove(ans.NmrProblem);
+            if (ans.MassProblem != null)
+                _context.MassProblems.Remove(ans.MassProblem);
+            if (ans.NmrProblem != null)
+                _context.NmrProblems.Remove(ans.NmrProblem);
 
             if (formula != null && formula.IsValid())
             {
@@ -116,25 +130,22 @@ namespace SpectraMaster.Models
                 massProblem.Answer = ans;
                 await _context.MassProblems.AddAsync(massProblem);
             }
-            
-            // append new pictures
-            await _context.AnswerPics.AddRangeAsync(ansPictures);
-            await _context.ProblemPics.AddRangeAsync(probPictures);
+
 
             var answerEntity = _context.SpectraAnswers.Attach(ans);
             answerEntity.State = EntityState.Modified;
-            
+
             await _context.SaveChangesAsync();
             return ans;
         }
 
         public SpectraAnswer RetrieveAnswerById(int id)
         {
-            var ans= _context.SpectraAnswers
-                .Include(a=>a.AnswerPictures)
-                .Include(a=>a.ProblemPictures)
-                .Include(a=>a.NmrProblem)
-                .Include(a=>a.MassProblem)
+            var ans = _context.SpectraAnswers
+                .Include(a => a.AnswerPictures)
+                .Include(a => a.ProblemPictures)
+                .Include(a => a.NmrProblem)
+                .Include(a => a.MassProblem)
                 .FirstOrDefault(a => a.Id == id);
             return ans;
         }
@@ -159,7 +170,8 @@ namespace SpectraMaster.Models
 
         public IEnumerable<SpectraAnswer> RetrieveAnswer(FormulaConfig formula, float minIonPeak, float maxIonPeak)
         {
-            if ((formula == null || !formula.IsValid()) && (minIonPeak < 0 && maxIonPeak < 0 || minIonPeak > maxIonPeak)) return null;
+            if ((formula == null || !formula.IsValid()) &&
+                (minIonPeak < 0 && maxIonPeak < 0 || minIonPeak > maxIonPeak)) return null;
             var ans = RetrieveAllAnswers();
             // nmr
             if (formula != null && formula.IsValid())

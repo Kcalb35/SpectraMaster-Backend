@@ -1,8 +1,10 @@
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using SpectraMaster.Data;
 using SpectraMaster.Models;
+using SpectraMaster.Utils;
 
 namespace SpectraMaster.Controllers
 {
@@ -26,8 +28,8 @@ namespace SpectraMaster.Controllers
         public IActionResult Login([FromBody] LoginReq req)
         {
             var flag = _auth.IsAuthenticate(req, out var jwt);
-            if (!flag) return NotFound("incorrect username or password");
-            else return Ok(new{jwt=jwt});
+            if (!flag) return NotFound(ApiResponse.Error("incorrect username or password"));
+            else return Ok(ApiResponse.Success(jwt));
         }
     }
 }

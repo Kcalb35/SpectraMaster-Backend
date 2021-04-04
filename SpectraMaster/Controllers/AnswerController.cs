@@ -1,9 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using SpectraMaster.Models;
 using SpectraMaster.Utils;
 
@@ -28,8 +31,8 @@ namespace SpectraMaster.Controllers
         public IActionResult GetAnswerById([FromRoute] int id)
         {
             var ans = _repo.RetrieveAnswerById(id);
-            if (ans == null) return NotFound();
-            return Ok(ResponseUtil.AnswerConvert(ans));
+            if (ans == null) return NotFound(ApiResponse.Error("answer not found"));
+            return Ok(ApiResponse.Success(ResponseUtil.AnswerConvert(ans)));
         }
 
         [AllowAnonymous]
@@ -38,7 +41,7 @@ namespace SpectraMaster.Controllers
         {
             var ans = _repo.RetrieveAllAnswers();
             var resp = ans.Select(ResponseUtil.AnswerConvert);
-            return Ok(resp);
+            return Ok(ApiResponse.Success(resp));
         }
 
         [AllowAnonymous]
@@ -46,7 +49,7 @@ namespace SpectraMaster.Controllers
         public IActionResult GetAllNMR()
         {
             var probs = _repo.RetrieveAllNmrProblems().Select(ResponseUtil.NmrProblemConvert);
-            return Ok(probs);
+            return Ok(ApiResponse.Success(probs));
         }
 
         [AllowAnonymous]
@@ -54,8 +57,8 @@ namespace SpectraMaster.Controllers
         public IActionResult GetNMRById(int id)
         {
             var prob = _repo.RetrieveNmrProblemById(id);
-            if (prob == null) return NotFound();
-            return Ok(ResponseUtil.NmrProblemConvert(prob));
+            if (prob == null) return NotFound(ApiResponse.Error("nmr problem not found"));
+            return Ok(ApiResponse.Success(ResponseUtil.NmrProblemConvert(prob)));
         }
 
         [AllowAnonymous]
@@ -63,7 +66,7 @@ namespace SpectraMaster.Controllers
         public IActionResult GetAllMass()
         {
             var probs = _repo.RetrieveAllMassProblems().Select(ResponseUtil.MassProblemConvert);
-            return Ok(probs);
+            return Ok(ApiResponse.Success(probs));
         }
 
         [AllowAnonymous]
@@ -71,8 +74,8 @@ namespace SpectraMaster.Controllers
         public IActionResult GetMassById(int id)
         {
             var prob = _repo.RetrieveMassProblemById(id);
-            if (prob == null) return NotFound();
-            return Ok(prob);
+            if (prob == null) return NotFound(ApiResponse.Error("mass problem not found"));
+            return Ok(ApiResponse.Success(prob));
         }
 
         [AllowAnonymous]
@@ -80,16 +83,17 @@ namespace SpectraMaster.Controllers
         public IActionResult SearchAnswer([FromBody] SearchReq req)
         {
             var answers = _repo.RetrieveAnswer(req.Formula, req.MinIonPeak, req.MaxIonPeak);
-            if (answers == null || !answers.Any()) return NotFound();
-            return Ok(answers.Select(ResponseUtil.AnswerConvert));
+            if (answers == null || !answers.Any()) return NotFound(ApiResponse.Error("answer not found please modify your conditions"));
+            var ans = answers.Select(ResponseUtil.AnswerConvert);
+            return Ok(ApiResponse.Success(ans));
         }
 
         [Authorize]
         [HttpPost("ans")]
         public async Task<IActionResult> CreateAnswer([FromForm] CreateReq req)
         {
-            if ((req.Formula==null || !req.Formula.IsValid()) && req.IonPeak< 0) return BadRequest();
-            if (string.IsNullOrEmpty(req.Answer) || string.IsNullOrEmpty(req.Problem)) return BadRequest();
+            if ((req.Formula==null || !req.Formula.IsValid()) && req.IonPeak< 0) return BadRequest(ApiResponse.Error("bad descriptions"));
+            if (string.IsNullOrEmpty(req.Answer) || string.IsNullOrEmpty(req.Problem)) return BadRequest(ApiResponse.Error("please input problem and answer descriptions"));
             // save files
             var problemPictures = new List<string>();
             var ansPictures = new List<string>();
@@ -100,7 +104,7 @@ namespace SpectraMaster.Controllers
                 foreach (var pic in req.AnsFiles)
                     ansPictures.Add(await _fileUtil.CopyToServerFileAsync(pic));
             var answer = await _repo.CreateAnswerAsync(req.Problem, req.Answer, problemPictures, ansPictures, req.Formula, req.IonPeak);
-            return Ok(ResponseUtil.AnswerConvert(answer));
+            return Ok(ApiResponse.Success(ResponseUtil.AnswerConvert(answer)));
         }
 
         [Authorize]
@@ -108,8 +112,8 @@ namespace SpectraMaster.Controllers
         public async Task<IActionResult> DeleteAnswer([FromRoute] int id)
         {
             var ans = await _repo.DeleteAnswerById(id);
-            if (ans) return Ok();
-            return NotFound();
+            if (ans) return Ok(ApiResponse.Success("delete successfully"));
+            return NotFound(ApiResponse.Error("answer not found"));
         }
 
         [Authorize]
@@ -117,8 +121,8 @@ namespace SpectraMaster.Controllers
         public async Task<IActionResult> DeleteNmrProblem(int id)
         {
             var flag = await _repo.DeleteNmrProblemById(id);
-            if (flag) return Ok();
-            return NotFound();
+            if (flag) return Ok(ApiResponse.Success("delete successfully"));
+            return NotFound(ApiResponse.Error("problem not found"));
         }
 
         [Authorize]
@@ -126,8 +130,8 @@ namespace SpectraMaster.Controllers
         public async Task<IActionResult> DeleteMassProblem(int id)
         {
             var flag = await _repo.DeleteMassProblemById(id);
-            if (flag) return Ok();
-            return NotFound();
+            if (flag) return Ok(ApiResponse.Success("delete successfully"));
+            return NotFound(ApiResponse.Error("problem not found"));
         }
 
         [Authorize]
@@ -135,9 +139,9 @@ namespace SpectraMaster.Controllers
         public async Task<IActionResult> UpdateAnswer([FromRoute] int id, [FromForm] CreateReq req)
         {
             var ans = _repo.RetrieveAnswerById(id);
-            if (ans == null) return NotFound();
-            if ((req.Formula == null || !req.Formula.IsValid()) && req.IonPeak < 0) return BadRequest();
-            if (string.IsNullOrEmpty(req.Answer) || string.IsNullOrEmpty(req.Problem)) return BadRequest();
+            if (ans == null) return NotFound(ApiResponse.Error("answer not found"));
+            if ((req.Formula == null || !req.Formula.IsValid()) && req.IonPeak < 0) return BadRequest(ApiResponse.Error("please limit conditions"));
+            if (string.IsNullOrEmpty(req.Answer) || string.IsNullOrEmpty(req.Problem)) return BadRequest(ApiResponse.Error("please input problem and answer descriptions"));
             var problemPictures = new List<string>();
             var ansPictures = new List<string>();
             if (req.ProbFiles!= null && req.ProbFiles.Any())
@@ -148,7 +152,17 @@ namespace SpectraMaster.Controllers
                     ansPictures.Add(await _fileUtil.CopyToServerFileAsync(pic));
             var answer = await _repo.UpdateAnswerAsync(id, req.Problem, req.Answer, problemPictures, ansPictures, req.IonPeak,
                 req.Formula);
-            return Ok(ResponseUtil.AnswerConvert(answer));
+            return Ok(ApiResponse.Success(ResponseUtil.AnswerConvert(answer)));
+        }
+
+        [Authorize]
+        [HttpPost("upload")]
+        public async Task<IActionResult> UplodaFile([FromBody] IFormFile file)
+        {
+            var filename = await _fileUtil.CopyToServerFileAsync(file);
+            if (filename != null)
+                return Ok(ApiResponse.Success(filename));
+            else return BadRequest(ApiResponse.Error("error"));
         }
     }
 }

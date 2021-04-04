@@ -23,7 +23,7 @@ namespace SpectraMaster.Models
         
         public bool IsAuthenticate(LoginReq req, out string jwt)
         {
-            var mgr = _context.Managers.FirstOrDefault(x => x.Username == req.UserName);
+            var mgr = _context.Managers.FirstOrDefault(x => x.Username == req.Username);
             // username or password incorrect
             if (mgr == null || !BCrypt.Net.BCrypt.Verify(req.Password, mgr.Password))
             {
@@ -37,7 +37,7 @@ namespace SpectraMaster.Models
                     new Claim(JwtRegisteredClaimNames.Nbf, $"{new DateTimeOffset(DateTime.Now).ToUnixTimeSeconds()}"),
                     new Claim(JwtRegisteredClaimNames.Exp,
                         $"{new DateTimeOffset(DateTime.Now.AddHours(24)).ToUnixTimeSeconds()}"),
-                    new Claim(ClaimTypes.Name, req.UserName)
+                    new Claim(ClaimTypes.Name, req.Username)
                 };
                 var secret = _token.Secret;
                 var issuer = _token.Issuer;

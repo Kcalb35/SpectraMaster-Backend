@@ -24,7 +24,8 @@ namespace SpectraMaster.Utils
                 var folder = Path.Combine(_env.WebRootPath, "images");
                 uniqureFileName = $"{Guid.NewGuid().ToString()}_{file.FileName}";
                 var filepath = Path.Combine(folder, uniqureFileName);
-                await file.CopyToAsync(new FileStream(filepath, FileMode.Create));
+                await using var fswrite = new FileStream(filepath, FileMode.OpenOrCreate);
+                await file.CopyToAsync(fswrite);
             }
 
             return uniqureFileName;

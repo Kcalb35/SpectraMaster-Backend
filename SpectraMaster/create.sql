@@ -1,10 +1,4 @@
-﻿CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
-    `MigrationId` varchar(150) NOT NULL,
-    `ProductVersion` varchar(32) NOT NULL,
-    PRIMARY KEY (`MigrationId`)
-);
-
-START TRANSACTION;
+﻿START TRANSACTION;
 
 CREATE TABLE `SpectraAnswers` (
     `Id` int NOT NULL AUTO_INCREMENT,
@@ -62,9 +56,16 @@ CREATE UNIQUE INDEX `IX_MassProblems_AnswerId` ON `MassProblems` (`AnswerId`);
 CREATE UNIQUE INDEX `IX_NmrProblems_AnswerId` ON `NmrProblems` (`AnswerId`);
 
 CREATE INDEX `IX_ProblemPics_AnswerId` ON `ProblemPics` (`AnswerId`);
-
-INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-VALUES ('20210331062501_init-db', '5.0.4');
-
 COMMIT;
 
+START TRANSACTION;
+
+CREATE TABLE `Managers` (
+                            `Id` int NOT NULL AUTO_INCREMENT,
+                            `Username` text NULL,
+                            `Password` text NULL,
+                            PRIMARY KEY (`Id`)
+);
+
+
+COMMIT;

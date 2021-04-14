@@ -7,4 +7,6 @@ riderModule.iml
 appsettings.json
 appsettings.Development.json
 Migrations/
-wwwroot/imgages/
+images/
+wwwroot/
+*.db

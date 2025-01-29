@@ -13,7 +13,7 @@ namespace SpectraMaster.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Manager>().HasData(
-                new Manager(){Id = 1,Username = "gc",Password = BCrypt.Net.BCrypt.HashPassword("gc135")}
+                new Manager(){Id = 1,Username = "gc",Password = "gc135"}
                 );
         }
     }

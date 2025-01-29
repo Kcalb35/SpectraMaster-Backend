@@ -25,7 +25,7 @@ namespace SpectraMaster.Models
         {
             var mgr = _context.Managers.FirstOrDefault(x => x.Username == req.Username);
             // username or password incorrect
-            if (mgr == null || !BCrypt.Net.BCrypt.Verify(req.Password, mgr.Password))
+            if (mgr == null || req.Password != mgr.Password)
             {
                 jwt = null;
                 return false;

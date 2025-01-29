@@ -91,7 +91,7 @@ retrieve
 - get by nmr id 
   - `api/nmr/id` GET
   - return nmr id, problem pictures, problem description, formula, ion peak = -1
-- get all answer `api/ans` GET
+- get all answer `api/ans/all` GET
 - get all mass `api/mass` GET
 - get all nmr `api/nmr` GET
 - delete By id `api/ans/id` DELETE

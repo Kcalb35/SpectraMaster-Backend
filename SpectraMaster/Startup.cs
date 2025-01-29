@@ -28,9 +28,9 @@ namespace SpectraMaster
         public void ConfigureServices(IServiceCollection services)
         {   
             services.AddControllers();
-            var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContextPool<AnswerDbContext>(opt => opt.UseMySQL(connectionString));
-            services.AddDbContextPool<ManagerDbContext>(opt => opt.UseMySQL(connectionString));
+            var connectionString = "Data Source=spectra.sqlite";
+            services.AddDbContextPool<AnswerDbContext>(opt => opt.UseSqlite(connectionString));
+            services.AddDbContextPool<ManagerDbContext>(opt => opt.UseSqlite(connectionString));
 
             services.AddTransient<IAnswerRepository,AnswerRepository>();
             services.AddSingleton<IFileUtil, FileUtil>();

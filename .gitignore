@@ -10,3 +10,4 @@ Migrations/
 images/
 wwwroot/
 *.db
+*.sqlite
